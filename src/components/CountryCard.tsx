@@ -4,6 +4,7 @@ import { useState, useTransition } from "react";
 import type { PPPDatum } from "@/lib/types";
 import { COUNTRY_MAP } from "@/lib/countries";
 import { formatNumber, formatPercent, describeDataLag } from "@/lib/format";
+import { trackEvent } from "@/components/GoogleAnalytics";
 
 interface CountryCardProps {
   data: PPPDatum;
@@ -26,6 +27,7 @@ export function CountryCard({ data, accent, insightsEnabled }: CountryCardProps)
 
   function requestInsight() {
     if (!insightsEnabled) return;
+    trackEvent("insights_requested", "Country Insights", data.countryCode);
     startTransition(async () => {
       setMessage(null);
       setError(null);

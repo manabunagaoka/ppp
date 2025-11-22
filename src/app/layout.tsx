@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Geist_Mono, Inter } from "next/font/google";
+import { GoogleAnalytics } from "@/components/GoogleAnalytics";
 import "./globals.css";
 
 const inter = Inter({
@@ -28,6 +29,7 @@ export default function RootLayout({
       <body
         className={`${inter.variable} ${geistMono.variable} bg-night-950 text-slate-100 antialiased`}
       >
+        <GoogleAnalytics />
         <div className="relative isolate min-h-screen bg-night-950">
           <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-night-900/90 via-night-950 to-night-950" />
           <div className="pointer-events-none absolute inset-0 bg-grid-night bg-grid opacity-25" />

@@ -5,6 +5,7 @@ import { COUNTRY_MAP } from "@/lib/countries";
 import { CountryCard } from "@/components/CountryCard";
 import { PPPCalculator } from "@/components/PPPCalculator";
 import { formatNumber, formatPercent } from "@/lib/format";
+import { trackEvent } from "@/components/GoogleAnalytics";
 import type { PPPDatum } from "@/lib/types";
 
 type SortOption = "region" | "multiplier" | "gdp";
@@ -78,7 +79,11 @@ export default function Home() {
             <label className="text-xs text-slate-500">Sort:</label>
             <select
               value={sortBy}
-              onChange={(e) => setSortBy(e.target.value as SortOption)}
+              onChange={(e) => {
+                const newSort = e.target.value as SortOption;
+                setSortBy(newSort);
+                trackEvent("sort_changed", "Quick Compare", newSort);
+              }}
               className="rounded border border-white/10 bg-night-900/50 px-3 py-1 text-xs text-white focus:border-brand-gold focus:outline-none"
             >
               <option value="region">Region</option>

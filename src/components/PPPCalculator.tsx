@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { COUNTRIES } from "@/lib/countries";
 import { formatNumber } from "@/lib/format";
+import { trackEvent } from "@/components/GoogleAnalytics";
 import type { PPPDatum } from "@/lib/types";
 
 interface PPPCalculatorProps {
@@ -23,7 +24,16 @@ export function PPPCalculator({ markets }: PPPCalculatorProps) {
     const value = e.target.value.replace(/,/g, "");
     if (value === "" || !isNaN(Number(value))) {
       setUsdAmount(value);
+      if (value && !isNaN(Number(value))) {
+        trackEvent("calculator_amount_entered", "Calculator", selectedCountry, Number(value));
+      }
     }
+  };
+
+  const handleCountryChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const newCountry = e.target.value;
+    setSelectedCountry(newCountry);
+    trackEvent("calculator_country_selected", "Calculator", newCountry);
   };
 
   const displayAmount = numericAmount ? formatNumber(numericAmount, { maximumFractionDigits: 0 }) : "";
@@ -58,7 +68,7 @@ export function PPPCalculator({ markets }: PPPCalculatorProps) {
           </label>
           <select
             value={selectedCountry}
-            onChange={(e) => setSelectedCountry(e.target.value)}
+            onChange={handleCountryChange}
             className="w-full rounded-lg border border-white/10 bg-night-900/50 px-4 py-3 text-white focus:border-brand-gold focus:outline-none"
           >
             {COUNTRIES.filter((c) => c.code !== "USA").map((country) => (
