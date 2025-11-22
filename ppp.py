@@ -44,9 +44,13 @@ def auto_detect_format(data):
         except json.JSONDecodeError:
             pass
     
-    # Check for XML
+    # Check for XML by attempting to parse it
     if data_stripped.startswith('<'):
-        return 'xml'
+        try:
+            xml.dom.minidom.parseString(data_stripped)
+            return 'xml'
+        except xml.parsers.expat.ExpatError:
+            pass
     
     return None
 

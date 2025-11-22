@@ -87,6 +87,11 @@ class TestAutoDetectFormat(unittest.TestCase):
         """Test handling unknown format."""
         data = 'plain text'
         self.assertIsNone(auto_detect_format(data))
+    
+    def test_detect_invalid_xml(self):
+        """Test that invalid XML is not detected as XML."""
+        data = '<root><unclosed>'
+        self.assertIsNone(auto_detect_format(data))
 
 
 if __name__ == '__main__':
