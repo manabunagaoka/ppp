@@ -7,6 +7,7 @@ A simple utility to pretty print various data formats.
 import json
 import sys
 import xml.dom.minidom
+import xml.parsers.expat
 from argparse import ArgumentParser
 
 
@@ -27,7 +28,7 @@ def pretty_print_xml(data):
     try:
         dom = xml.dom.minidom.parseString(data)
         return dom.toprettyxml(indent="  ")
-    except Exception as e:
+    except xml.parsers.expat.ExpatError as e:
         raise ValueError(f"Invalid XML: {e}")
 
 
@@ -40,7 +41,7 @@ def auto_detect_format(data):
         try:
             json.loads(data_stripped)
             return 'json'
-        except:
+        except json.JSONDecodeError:
             pass
     
     # Check for XML
