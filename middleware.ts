@@ -12,20 +12,14 @@ const MANABOODLE_BASE_URL = 'https://www.manaboodle.com';
 const MANABOODLE_LOGIN_URL = 'https://www.manaboodle.com/academic-portal/login';
 const APP_NAME = 'PPP';
 
-// Paths that don't require authentication (entire app is accessible)
+// Paths that don't require authentication
 const PUBLIC_PATHS = [
-  '/',              
   '/login',         
   '/api/logout',
   '/api/sso-callback',
-  '/api/markets',
-  '/api/ppp',
-  '/api/analyze',
-  '/api/analyze-context',
-  '/api/explain',
 ];
 
-// No protected paths - entire app is public, users just need to login via Academic Portal
+// All other paths require authentication
 const PROTECTED_PATHS: string[] = [];
 
 // ============================================
@@ -121,8 +115,53 @@ export async function middleware(request: NextRequest) {
     return NextResponse.next();
   }
   
-  // For all other paths, allow through (no protected paths in PPP)
-  return NextResponse.next();
+  // For all other paths, require authentication
+  if (!token) {
+    console.log('[PPP MIDDLEWARE] No token, redirecting to login');
+    const loginUrl = new URL('/login', request.url);
+    loginUrl.searchParams.set('redirect_to', pathname);
+    return NextResponse.redirect(loginUrl);
+  }
+  
+  // Verify token and inject user headers
+  try {
+    const verifyResponse = await fetch(`${MANABOODLE_BASE_URL}/api/sso/verify`, {
+      headers: { 
+        'Authorization': `Bearer ${token}`,
+        'Cache-Control': 'no-cache'
+      },
+      cache: 'no-store'
+    });
+    
+    if (verifyResponse.ok) {
+      const responseData = await verifyResponse.json();
+      const user = responseData.user || responseData;
+      
+      if (user && user.id && user.email) {
+        console.log('[PPP MIDDLEWARE] User authenticated:', user.email);
+        const response = NextResponse.next();
+        
+        response.headers.set('x-user-id', user.id);
+        response.headers.set('x-user-email', user.email);
+        response.headers.set('x-user-name', user.name || '');
+        response.headers.set('x-user-class', user.classCode || '');
+        
+        return response;
+      }
+    }
+    
+    // Invalid token, redirect to login
+    console.log('[PPP MIDDLEWARE] Invalid token, redirecting to login');
+    const response = NextResponse.redirect(new URL('/login', request.url));
+    response.cookies.delete('manaboodle_sso_token');
+    response.cookies.delete('manaboodle_sso_refresh');
+    return response;
+  } catch (error) {
+    console.error('[PPP MIDDLEWARE] Error verifying token:', error);
+    const loginUrl = new URL('/login', request.url);
+    loginUrl.searchParams.set('redirect_to', pathname);
+    return NextResponse.redirect(loginUrl);
+  }
 }
 
 // Configure which paths this middleware runs on
