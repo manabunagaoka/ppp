@@ -26,10 +26,9 @@ function LoginPageContent() {
       <div className="relative bg-night-900/50 backdrop-blur-md border border-white/10 rounded-2xl p-8 max-w-md w-full shadow-2xl">
         {/* Logo */}
         <div className="flex flex-col items-center mb-8">
-          <div className="w-16 h-16 bg-gradient-to-br from-brand-gold to-yellow-600 rounded-xl flex items-center justify-center shadow-lg mb-4">
-            <span className="text-night-900 font-bold text-3xl">$</span>
-          </div>
-          <h1 className="text-3xl font-bold text-white mb-2">PPP</h1>
+          <h1 className="text-4xl font-bold bg-gradient-to-r from-brand-gold via-yellow-500 to-brand-gold bg-clip-text text-transparent mb-2">
+            PPP
+          </h1>
           <p className="text-slate-400 text-sm">by Manaboodle</p>
         </div>
 
