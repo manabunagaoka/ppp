@@ -1,7 +1,13 @@
 import { COUNTRIES, COUNTRY_MAP, type CountryConfig, type MarketCode } from "./countries";
 import { fetchFxRates } from "./fx";
 import { fetchSdmxSeries, pickLatest } from "./sdmx";
-import { fetchWorldBankSeries, pickLatestWorldBankPoint } from "./worldbank";
+import { 
+  fetchWorldBankSeries, 
+  pickLatestWorldBankPoint, 
+  fetchPopulation, 
+  fetchInflationRate, 
+  fetchUnemploymentRate 
+} from "./worldbank";
 import type { PPPDatum } from "./types";
 
 const PPP_DATASET = "PPPGDP";
@@ -50,6 +56,52 @@ export async function buildMarketSnapshot(targets: MarketCode[] = COUNTRIES.map(
     })
   );
 
+  // Fetch additional World Bank metrics in parallel
+  const [populationData, inflationData, unemploymentData] = await Promise.all([
+    Promise.all(
+      countries.map(async (country) => ({
+        code: country.code,
+        value: await fetchPopulation(country.iso2),
+      }))
+    ),
+    Promise.all(
+      countries.map(async (country) => ({
+        code: country.code,
+        value: await fetchInflationRate(country.iso2),
+      }))
+    ),
+    Promise.all(
+      countries.map(async (country) => ({
+        code: country.code,
+        value: await fetchUnemploymentRate(country.iso2),
+      }))
+    ),
+  ]);
+
+  const populationMap = populationData.reduce<Record<MarketCode, number | null>>(
+    (acc, { code, value }) => {
+      acc[code] = value;
+      return acc;
+    },
+    {} as Record<MarketCode, number | null>
+  );
+
+  const inflationMap = inflationData.reduce<Record<MarketCode, number | null>>(
+    (acc, { code, value }) => {
+      acc[code] = value;
+      return acc;
+    },
+    {} as Record<MarketCode, number | null>
+  );
+
+  const unemploymentMap = unemploymentData.reduce<Record<MarketCode, number | null>>(
+    (acc, { code, value }) => {
+      acc[code] = value;
+      return acc;
+    },
+    {} as Record<MarketCode, number | null>
+  );
+
   const gdpLatestMap = gdpSeries.reduce<Record<MarketCode, { value: number; period: string }>>(
     (acc, { code, points }) => {
       const latest = pickLatestWorldBankPoint(points);
@@ -96,6 +148,9 @@ export async function buildMarketSnapshot(targets: MarketCode[] = COUNTRIES.map(
       multiplier,
       localPurchasingPower: multiplier,
       gdpVsUsa,
+      population: populationMap[country.code] ?? null,
+      inflationRate: inflationMap[country.code] ?? null,
+      unemploymentRate: unemploymentMap[country.code] ?? null,
     };
   });
 
@@ -119,5 +174,10 @@ function countryByCode(code: MarketCode) {
 function computeMultiplier(marketRate: number | null, pppRate: number | null) {
   if (!marketRate || !pppRate) return null;
   if (pppRate === 0) return null;
+  // Market rate / PPP rate = revenue purchasing power multiplier
+  // Market rate = actual exchange rate (e.g., 156 JPY per USD)
+  // PPP rate = purchasing power rate (e.g., 105 JPY per "PPP dollar")
+  // If market rate > PPP rate → consumers spending more → higher revenue value → multiplier > 1
+  // If market rate < PPP rate → consumers spending less → lower revenue value → multiplier < 1
   return Number((marketRate / pppRate).toFixed(3));
 }

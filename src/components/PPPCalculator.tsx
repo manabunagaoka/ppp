@@ -8,11 +8,12 @@ import type { PPPDatum } from "@/lib/types";
 
 interface PPPCalculatorProps {
   markets: PPPDatum[];
+  selectedCountry: string;
+  onCountryChange: (country: string) => void;
 }
 
-export function PPPCalculator({ markets }: PPPCalculatorProps) {
-  const [usdAmount, setUsdAmount] = useState<string>("100000");
-  const [selectedCountry, setSelectedCountry] = useState<string>("MEX");
+export function PPPCalculator({ markets, selectedCountry, onCountryChange }: PPPCalculatorProps) {
+  const [usdAmount, setUsdAmount] = useState<string>("1000000");
 
   const market = markets.find((m) => m.countryCode === selectedCountry);
   const multiplier = market?.multiplier || 1;
@@ -32,7 +33,7 @@ export function PPPCalculator({ markets }: PPPCalculatorProps) {
 
   const handleCountryChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const newCountry = e.target.value;
-    setSelectedCountry(newCountry);
+    onCountryChange(newCountry);
     trackEvent("calculator_country_selected", "Calculator", newCountry);
   };
 
@@ -41,8 +42,8 @@ export function PPPCalculator({ markets }: PPPCalculatorProps) {
   return (
     <section className="glass-panel space-y-4 p-6">
       <header>
-        <p className="text-xs uppercase tracking-[0.3em] text-slate-500">PPP Calculator</p>
-        <h3 className="text-lg font-semibold text-white">Real purchasing power converter</h3>
+        <h3 className="text-lg font-semibold text-white">Real Purchasing Power Converter</h3>
+        <p className="text-sm text-slate-400 mt-1">Compare purchasing power across 11 global markets against USD</p>
       </header>
       
       <div className="grid gap-4 sm:grid-cols-2">
@@ -93,10 +94,10 @@ export function PPPCalculator({ markets }: PPPCalculatorProps) {
         </p>
         <p className="mt-3 text-xs text-slate-400">
           {multiplier > 1 
-            ? `Your $${formatNumber(numericAmount, { maximumFractionDigits: 0 })} buys what would cost $${formatNumber(realValue, { maximumFractionDigits: 0 })} worth of goods/services in the US.`
+            ? `PPP multiplier higher than 1 means lower local costs. $${formatNumber(numericAmount, { maximumFractionDigits: 0 })} USD has purchasing power equivalent to $${formatNumber(realValue, { maximumFractionDigits: 0 })} in the US market.`
             : multiplier < 1
-            ? `Your $${formatNumber(numericAmount, { maximumFractionDigits: 0 })} only buys what would cost $${formatNumber(realValue, { maximumFractionDigits: 0 })} in the US - ${country?.name} is more expensive.`
-            : `${country?.name} has purchasing power parity with the US.`
+            ? `PPP multiplier below 1 means higher local costs. $${formatNumber(numericAmount, { maximumFractionDigits: 0 })} USD has purchasing power equivalent to only $${formatNumber(realValue, { maximumFractionDigits: 0 })} in the US market.`
+            : `PPP multiplier at 1 means equal purchasing power with the US market.`
           }
         </p>
       </div>

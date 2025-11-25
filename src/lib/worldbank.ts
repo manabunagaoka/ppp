@@ -44,3 +44,43 @@ export async function fetchWorldBankSeries(countryIso2: string, indicator: strin
 export function pickLatestWorldBankPoint(points: WorldBankPoint[]) {
   return [...points].sort((a, b) => Number(b.period) - Number(a.period))[0];
 }
+
+// World Bank Indicator Codes
+export const WB_INDICATORS = {
+  POPULATION: "SP.POP.TOTL", // Total population
+  INFLATION: "FP.CPI.TOTL.ZG", // Inflation, consumer prices (annual %)
+  UNEMPLOYMENT: "SL.UEM.TOTL.ZS", // Unemployment, total (% of total labor force)
+} as const;
+
+export async function fetchPopulation(countryIso2: string): Promise<number | null> {
+  try {
+    const points = await fetchWorldBankSeries(countryIso2, WB_INDICATORS.POPULATION);
+    const latest = pickLatestWorldBankPoint(points);
+    return latest?.value ?? null;
+  } catch (error) {
+    console.error(`Failed to fetch population for ${countryIso2}:`, error);
+    return null;
+  }
+}
+
+export async function fetchInflationRate(countryIso2: string): Promise<number | null> {
+  try {
+    const points = await fetchWorldBankSeries(countryIso2, WB_INDICATORS.INFLATION);
+    const latest = pickLatestWorldBankPoint(points);
+    return latest?.value ?? null;
+  } catch (error) {
+    console.error(`Failed to fetch inflation for ${countryIso2}:`, error);
+    return null;
+  }
+}
+
+export async function fetchUnemploymentRate(countryIso2: string): Promise<number | null> {
+  try {
+    const points = await fetchWorldBankSeries(countryIso2, WB_INDICATORS.UNEMPLOYMENT);
+    const latest = pickLatestWorldBankPoint(points);
+    return latest?.value ?? null;
+  } catch (error) {
+    console.error(`Failed to fetch unemployment for ${countryIso2}:`, error);
+    return null;
+  }
+}

@@ -13,6 +13,9 @@ export type PPPDatum = {
   multiplier: number | null;
   localPurchasingPower: number | null;
   gdpVsUsa: number | null;
+  population: number | null; // Total population (World Bank)
+  inflationRate: number | null; // Annual inflation rate % (World Bank)
+  unemploymentRate: number | null; // Unemployment rate % (World Bank)
   notes?: string;
 };
 

@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import { Geist_Mono, Inter } from "next/font/google";
 import { GoogleAnalytics } from "@/components/GoogleAnalytics";
+import { Header } from "@/components/Header";
+import { getUser } from "@/lib/auth";
 import "./globals.css";
 
 const inter = Inter({
@@ -19,11 +21,13 @@ export const metadata: Metadata = {
     "Benchmark $1 USD across global markets using PPP-adjusted purchasing power.",
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const user = await getUser();
+  
   return (
     <html lang="en">
       <body
@@ -35,6 +39,7 @@ export default function RootLayout({
           <div className="pointer-events-none absolute inset-0 bg-grid-night bg-grid opacity-25" />
           <div className="pointer-events-none absolute inset-x-0 top-[-10%] h-96 rotate-12 bg-brand-pink/20 blur-[140px]" />
           <div className="relative z-10 flex min-h-screen flex-col">
+            <Header user={user} />
             {children}
           </div>
         </div>

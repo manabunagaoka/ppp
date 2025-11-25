@@ -1,0 +1,87 @@
+"use client";
+
+import { useSearchParams } from 'next/navigation';
+import { Suspense } from 'react';
+
+function LoginPageContent() {
+  const searchParams = useSearchParams();
+  const redirectTo = searchParams.get('redirect_to') || '/';
+  
+  const handleLogin = () => {
+    const origin = window.location.origin;
+    const callbackUrl = `${origin}/api/sso-callback?redirect_to=${encodeURIComponent(redirectTo)}`;
+    const loginUrl = `https://www.manaboodle.com/academic-portal/login?return_url=${encodeURIComponent(callbackUrl)}&app_name=PPP`;
+    window.location.href = loginUrl;
+  };
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-night-950 via-night-900 to-night-800 flex items-center justify-center p-4">
+      {/* Background decoration */}
+      <div className="absolute inset-0 overflow-hidden">
+        <div className="absolute -top-40 -right-40 w-80 h-80 bg-brand-gold/10 rounded-full blur-3xl"></div>
+        <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-brand-gold/5 rounded-full blur-3xl"></div>
+      </div>
+
+      {/* Login card */}
+      <div className="relative bg-night-900/50 backdrop-blur-md border border-white/10 rounded-2xl p-8 max-w-md w-full shadow-2xl">
+        {/* Logo */}
+        <div className="flex flex-col items-center mb-8">
+          <div className="w-16 h-16 bg-gradient-to-br from-brand-gold to-yellow-600 rounded-xl flex items-center justify-center shadow-lg mb-4">
+            <span className="text-night-900 font-bold text-3xl">$</span>
+          </div>
+          <h1 className="text-3xl font-bold text-white mb-2">PPP</h1>
+          <p className="text-slate-400 text-sm">by Manaboodle</p>
+        </div>
+
+        {/* Welcome text */}
+        <div className="text-center mb-8">
+          <h2 className="text-xl font-semibold text-white mb-2">
+            Welcome Back
+          </h2>
+          <p className="text-slate-400 text-sm">
+            Sign in with your Manaboodle account to continue
+          </p>
+        </div>
+
+        {/* Login button */}
+        <button
+          onClick={handleLogin}
+          className="w-full py-3 bg-brand-gold hover:bg-yellow-600 text-night-900 font-semibold rounded-lg transition-colors shadow-lg hover:shadow-xl"
+        >
+          Log in with Manaboodle
+        </button>
+
+        <p className="text-xs text-slate-500 text-center mt-4">
+          Secure authentication via Manaboodle Academic Portal
+        </p>
+
+        {/* Create account link */}
+        <div className="mt-6 text-center">
+          <p className="text-sm text-slate-400">
+            Don't have an account?{' '}
+            <a
+              href="https://www.manaboodle.com/signup"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-brand-gold hover:underline"
+            >
+              Sign up
+            </a>
+          </p>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-gradient-to-br from-night-950 via-night-900 to-night-800 flex items-center justify-center">
+        <div className="text-white text-xl">Loading...</div>
+      </div>
+    }>
+      <LoginPageContent />
+    </Suspense>
+  );
+}
