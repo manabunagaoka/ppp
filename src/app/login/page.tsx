@@ -59,7 +59,7 @@ function LoginPageContent() {
           <p className="text-sm text-slate-400">
             Don't have an account?{' '}
             <a
-              href="https://www.manaboodle.com/signup"
+              href="https://www.manaboodle.com/academic-portal/signup"
               target="_blank"
               rel="noopener noreferrer"
               className="text-brand-gold hover:underline"
